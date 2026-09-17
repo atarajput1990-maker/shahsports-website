@@ -692,7 +692,7 @@ footer{background:var(--black);color:#fff;padding:80px 60px 40px}
       <button class="filter-btn" data-filter="glove">Gloves</button>
       <button class="filter-btn" data-filter="guard">Protection</button>
       <button class="filter-btn" data-filter="bag">Bags</button>
-      <button class="filter-btn" data-filter="ball">Accessories</button>
+      <button class="filter-btn" data-filter="accessor">Accessories</button>
     </div>
     <div id="product-grid" class="product-grid"></div>
     <div id="no-products" style="display:none;text-align:center;padding:60px;color:var(--mid)">
@@ -714,7 +714,7 @@ footer{background:var(--black);color:#fff;padding:80px 60px 40px}
   }
 
   function specLine(p){
-    return [p.composition, p.bow, p.sizes].filter(Boolean).join(' · ');
+    return [p.composition, p.bow, p.sizes, p.dimensions].filter(Boolean).join(' · ');
   }
 
   /* hand a product to the existing product modal */
@@ -732,6 +732,12 @@ footer{background:var(--black);color:#fff;padding:80px 60px 40px}
       p.sizes ? 1 : 0,
       p.name
     );
+    /* openMod has no Dimensions row of its own — append one */
+    if(p.dimensions){
+      document.getElementById('mod-specs').innerHTML +=
+        '<div class="spec-row"><span>Dimensions</span><span>' +
+        esc(p.dimensions) + '</span></div>';
+    }
   }
 
   function buildCard(p){
@@ -775,10 +781,19 @@ footer{background:var(--black);color:#fff;padding:80px 60px 40px}
     list.forEach(function(p){ gridEl.appendChild(buildCard(p)); });
   }
 
+  /* a filter tab matches any of several category keywords */
+  var FILTER_MAP = {
+    accessor: ['accessor','grip','ball','coaching'],
+    guard:    ['guard','headgear']
+  };
+
   /* full catalogue on the Hockey page */
   function render(filter){
+    var keys = FILTER_MAP[filter] || [filter];
     var list = (filter === 'all') ? PRODUCTS : PRODUCTS.filter(function(p){
-      return p.category && p.category.toLowerCase().indexOf(filter) !== -1;
+      if(!p.category) return false;
+      var cat = p.category.toLowerCase();
+      return keys.some(function(k){ return cat.indexOf(k) !== -1; });
     });
     fill(document.getElementById('product-grid'),
          document.getElementById('no-products'), list);

@@ -17,12 +17,13 @@ collections:
             summary: "{{fields.name}} — €{{fields.price}}"
             fields:
               - {label: "Product name", name: name, widget: string}
-              - {label: "Category", name: category, widget: select, options: ["Hockey stick","Bag","Glove","Shin guard","Face guard","Ball","Grip","Coaching board","Boxing"]}
+              - {label: "Category", name: category, widget: select, options: ["Hockey stick","Bag","Glove","Shin guard","Face guard","Headgear","Ball","Grip","Coaching board","Boxing"]}
               - {label: "Price (EUR)", name: price, widget: number}
               - {label: "Badge (e.g. Flagship, New, Indoor)", name: badge, widget: string, required: false}
               - {label: "Composition", name: composition, widget: select, required: false, options: ["100% Glass","30-50% Carbon","70% Carbon","90% Carbon","100% Carbon","Cast PVC","Premium Chamois","Magnetic",""]}
               - {label: "Sizes / Lengths", name: sizes, widget: select, required: false, options: ["36.5 / 37.5 / 38.5 inch","36.5 / 37.5 inch","32.5 / 34.5 inch","S / M / L / XL","XS / S / M / L / XL","Adjustable","Universal",""]}
               - {label: "Weight", name: weight, widget: string, required: false}
+              - {label: "Dimensions", name: dimensions, widget: string, required: false}
               - {label: "Available colours", name: colours, widget: select, required: false, options: ["Red, Yellow, Gold, Green, Pink","Red, Yellow, Blue, Pink","White, Neon Yellow","Natural",""]}
               - {label: "Bow type", name: bow, widget: select, required: false, options: ["Low bow","Mid bow","Standard bow",""]}
               - {label: "Description", name: description, widget: text}
