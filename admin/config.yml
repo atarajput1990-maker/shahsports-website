@@ -1,0 +1,22 @@
+backend:
+  name: git-gateway
+  branch: main
+media_folder: images/products
+public_folder: /images/products
+collections:
+  - name: products
+    label: Products
+    label_singular: Product
+    folder: _products
+    create: true
+    fields:
+      - {label: "Product name", name: title, widget: string}
+      - {label: "Category", name: category, widget: select, options: ["stick","bag","protection","glove","accessory"]}
+      - {label: "Price in EUR", name: price, widget: number}
+      - {label: "Badge", name: badge, widget: string, required: false}
+      - {label: "Composition", name: composition, widget: string, required: false}
+      - {label: "Sizes", name: sizes, widget: string, required: false}
+      - {label: "Weight", name: weight, widget: string, required: false}
+      - {label: "Colours", name: colours, widget: string, required: false}
+      - {label: "Description", name: description, widget: text}
+      - {label: "Image URL", name: image_url, widget: string, required: false}
