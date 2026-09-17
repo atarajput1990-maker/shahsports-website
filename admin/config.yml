@@ -4,19 +4,26 @@ backend:
 media_folder: images/products
 public_folder: /images/products
 collections:
-  - name: products
-    label: Products
-    label_singular: Product
-    folder: _products
-    create: true
-    fields:
-      - {label: "Product name", name: title, widget: string}
-      - {label: "Category", name: category, widget: select, options: ["stick","bag","protection","glove","accessory"]}
-      - {label: "Price in EUR", name: price, widget: number}
-      - {label: "Badge", name: badge, widget: string, required: false}
-      - {label: "Composition", name: composition, widget: string, required: false}
-      - {label: "Sizes", name: sizes, widget: string, required: false}
-      - {label: "Weight", name: weight, widget: string, required: false}
-      - {label: "Colours", name: colours, widget: string, required: false}
-      - {label: "Description", name: description, widget: text}
-      - {label: "Image URL", name: image_url, widget: string, required: false}
+  - name: catalogue
+    label: Product Catalogue
+    files:
+      - name: products
+        label: All Products
+        file: products.json
+        fields:
+          - name: products
+            label: Products
+            widget: list
+            summary: "{{fields.name}} — €{{fields.price}}"
+            fields:
+              - {label: "Product name", name: name, widget: string}
+              - {label: "Category", name: category, widget: select, options: ["Hockey stick","Bag","Glove","Shin guard","Face guard","Ball","Grip","Coaching board","Boxing"]}
+              - {label: "Price (EUR)", name: price, widget: number}
+              - {label: "Badge (e.g. Flagship, New, Indoor)", name: badge, widget: string, required: false}
+              - {label: "Composition", name: composition, widget: select, required: false, options: ["100% Glass","30-50% Carbon","70% Carbon","90% Carbon","100% Carbon","Cast PVC","Premium Chamois","Magnetic",""]}
+              - {label: "Sizes / Lengths", name: sizes, widget: select, required: false, options: ["36.5 / 37.5 / 38.5 inch","36.5 / 37.5 inch","32.5 / 34.5 inch","S / M / L / XL","XS / S / M / L / XL","Adjustable","Universal",""]}
+              - {label: "Weight", name: weight, widget: string, required: false}
+              - {label: "Available colours", name: colours, widget: select, required: false, options: ["Red, Yellow, Gold, Green, Pink","Red, Yellow, Blue, Pink","White, Neon Yellow","Natural",""]}
+              - {label: "Bow type", name: bow, widget: select, required: false, options: ["Low bow","Mid bow","Standard bow",""]}
+              - {label: "Description", name: description, widget: text}
+              - {label: "Product photo", name: image, widget: image, required: false}
