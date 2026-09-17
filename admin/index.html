@@ -405,14 +405,11 @@ var SITE_URL    = 'https://shahsports.pl';
 var CONTACT     = 'shahsports.poland@gmail.com';
 var WHATSAPP    = '+48 513 751 070';
 
-/* Git Gateway exposes the GitHub API under /.netlify/git/github.
-   Some setups expect the bare root, others the full /repos/{owner}/{repo}
-   path, so we probe both once and cache whichever answers. */
-var API_ROOTS = [
-  '/.netlify/git/github/repos/' + REPO,
-  '/.netlify/git/github'
-];
-var apiRoot = null;
+/* All GitHub access goes through Netlify Functions, which hold the
+   GitHub token as an environment variable. The browser never sees it. */
+var FN_GET    = '/.netlify/functions/get-products';
+var FN_SAVE   = '/.netlify/functions/save-products';
+var FN_UPLOAD = '/.netlify/functions/upload-image';
 
 /* Field options — these MUST stay in step with admin/config.yml */
 var OPTS = {
@@ -523,73 +520,35 @@ function getToken(){
   return Promise.resolve((u.token && u.token.access_token) || '');
 }
 
-/* ═══ Git Gateway ═══ */
-function gwFetch(path, opts){
-  opts = opts || {};
+/* ═══ function calls ═══ */
+/* Every write carries the Netlify Identity JWT. Netlify verifies it and
+   hands the function context.clientContext.user, so the functions can
+   reject anyone who is not signed in. */
+function fnFetch(url, body){
   return getToken().then(function(tok){
-    function attempt(rootIdx){
-      var root = apiRoot !== null ? apiRoot : API_ROOTS[rootIdx];
-      var headers = Object.assign({
-        'Authorization': 'Bearer ' + tok,
-        'Accept': 'application/json'
-      }, opts.headers || {});
-      if(opts.body) headers['Content-Type'] = 'application/json';
-
-      return fetch(root + path, {
-        method: opts.method || 'GET',
-        headers: headers,
-        body: opts.body ? JSON.stringify(opts.body) : undefined
-      }).then(function(res){
-        /* an unknown root 404s on every path — try the next one */
-        if(res.status === 404 && apiRoot === null && rootIdx < API_ROOTS.length - 1){
-          return attempt(rootIdx + 1);
-        }
-        if(apiRoot === null && res.ok) apiRoot = API_ROOTS[rootIdx];
-        return res;
-      });
-    }
-    return attempt(0);
-  });
-}
-
-function gwError(res, body){
-  var msg = 'Request failed (' + res.status + ')';
-  try{
-    var j = typeof body === 'string' ? JSON.parse(body) : body;
-    if(j && j.message) msg = j.message;
-  }catch(e){}
-  if(res.status === 401 || res.status === 403){
-    msg = 'Not authorised. Your session may have expired, or Git Gateway is not enabled for this site.';
-  }
-  if(res.status === 404){
-    msg = 'Could not reach the repository through Git Gateway. Check that Identity and Git Gateway are enabled in Netlify.';
-  }
-  if(res.status === 409){
-    msg = 'The file changed since it was loaded. Reload the page and try again.';
-  }
-  return new Error(msg);
-}
-
-/* GET a file — returns {json, sha} (sha null when the file is absent) */
-function readFile(path){
-  return gwFetch('/contents/' + path + '?ref=' + BRANCH).then(function(res){
-    if(res.status === 404) return {json:null, sha:null, missing:true};
-    return res.text().then(function(txt){
-      if(!res.ok) throw gwError(res, txt);
-      var data = JSON.parse(txt);
-      return {json: data, sha: data.sha, raw: data.content};
+    return fetch(url, {
+      method: body ? 'POST' : 'GET',
+      headers: body
+        ? {'Content-Type':'application/json', 'Authorization':'Bearer ' + tok}
+        : {'Authorization':'Bearer ' + tok},
+      body: body ? JSON.stringify(body) : undefined
     });
   });
 }
 
-function writeFile(path, contentB64, sha, message){
-  var body = {message: message, content: contentB64, branch: BRANCH};
-  if(sha) body.sha = sha;
-  return gwFetch('/contents/' + path, {method:'PUT', body:body}).then(function(res){
-    return res.text().then(function(txt){
-      if(!res.ok) throw gwError(res, txt);
-      return JSON.parse(txt || '{}');
-    });
+/* Turn a failed function response into a readable message */
+function fnError(res){
+  return res.text().then(function(txt){
+    var msg = 'Request failed (' + res.status + ')';
+    try{
+      var j = JSON.parse(txt);
+      if(j && (j.error || j.message)) msg = j.error || j.message;
+    }catch(e){ if(txt) msg = txt.slice(0,200); }
+    if(res.status === 401) msg = 'Not authorised \u2014 your session may have expired. Log out and back in.';
+    if(res.status === 404) msg = 'The admin functions are not deployed. Check that netlify/functions is set as the functions directory.';
+    if(res.status === 409) msg = 'The catalogue changed since this page loaded. Reload and try again.';
+    if(res.status === 500 && /token not configured/i.test(txt)) msg = 'GITHUB_TOKEN is not set in the Netlify environment variables.';
+    throw new Error(msg);
   });
 }
 
@@ -597,32 +556,20 @@ function writeFile(path, contentB64, sha, message){
 function loadProducts(){
   state.loading = true; state.error = null;
   render();
-  return readFile(DATA_FILE).then(function(r){
-    if(r.missing){ state.products = []; state.sha = null; }
-    else{
-      var parsed = JSON.parse(b64decode(r.raw));
-      state.products = (parsed && parsed.products) || [];
-      state.sha = r.sha;
-    }
+  return fnFetch(FN_GET).then(function(res){
+    if(!res.ok) return fnError(res);
+    return res.json();
+  }).then(function(data){
+    state.products = data.products || [];
+    state.sha = data.sha;
+    if(data.updated) state.lastUpdated = data.updated;
     state.loading = false;
     render();
-    loadLastCommit();
   }).catch(function(e){
     state.loading = false;
     state.error = e.message;
     render();
   });
-}
-
-function loadLastCommit(){
-  gwFetch('/commits?path=' + DATA_FILE + '&sha=' + BRANCH + '&per_page=1')
-    .then(function(res){ return res.ok ? res.json() : null; })
-    .then(function(list){
-      if(list && list[0] && list[0].commit && list[0].commit.committer){
-        state.lastUpdated = list[0].commit.committer.date;
-        if(state.view === 'products') render();
-      }
-    }).catch(function(){});
 }
 
 /* Build the record with keys in the same order as config.yml */
@@ -636,16 +583,14 @@ function normalise(p){
   return out;
 }
 
-function saveProducts(message){
-  var payload = {products: state.products.map(normalise)};
-  var body = JSON.stringify(payload, null, 2) + '\n';
-  /* re-read the sha immediately before writing so a stale one can't clobber */
-  return readFile(DATA_FILE).then(function(r){
-    return writeFile(DATA_FILE, b64encode(body), r.sha, message);
-  }).then(function(res){
-    if(res && res.content && res.content.sha) state.sha = res.content.sha;
+function saveProducts(products){
+  return fnFetch(FN_SAVE, {products: products, sha: state.sha}).then(function(res){
+    if(!res.ok) return fnError(res);
+    return res.json();
+  }).then(function(data){
+    if(data && data.content && data.content.sha) state.sha = data.content.sha;
     state.lastUpdated = new Date().toISOString();
-    return res;
+    return data;
   });
 }
 
@@ -657,12 +602,11 @@ function uploadImage(file, productName){
       var b64 = String(reader.result).split(',')[1];
       var ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g,'');
       var fname = slugify(productName) + '-' + Date.now() + '.' + ext;
-      var path = MEDIA_DIR + '/' + fname;
-      /* include the sha if something already sits at that path */
-      readFile(path).then(function(existing){
-        return writeFile(path, b64, existing.sha, 'Upload product image');
-      }).then(function(){
-        resolve('/' + path);
+      fnFetch(FN_UPLOAD, {filename: fname, content: b64}).then(function(res){
+        if(!res.ok) return fnError(res);
+        return res.json();
+      }).then(function(data){
+        resolve(data.path);
       }).catch(reject);
     };
     reader.readAsDataURL(file);
@@ -1014,7 +958,7 @@ function saveProduct(){
     /* 2. write the full products array back */
     if(idx >= 0) state.products[idx] = normalise(data);
     else state.products.push(normalise(data));
-    return saveProducts('Update products via admin');
+    return saveProducts(state.products.map(normalise));
   }).then(function(){
     state.saving = false;
     btn.disabled = false;
@@ -1051,7 +995,7 @@ function doDelete(){
   $('dialog').classList.remove('on');
   pendingDelete = -1;
   render();
-  saveProducts('Delete ' + removed.name + ' via admin').then(function(){
+  saveProducts(state.products.map(normalise)).then(function(){
     toast('Deleted — site will update in ~30 seconds', 'ok');
     render();
   }).catch(function(e){
