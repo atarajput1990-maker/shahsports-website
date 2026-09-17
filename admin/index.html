@@ -294,7 +294,7 @@ tbody tr:hover{background:var(--off)}
   <div class="login-box">
     <div class="login-logo"><span>SHAH</span> <span class="g">SPORTS</span></div>
     <div class="login-sub">Admin panel</div>
-    <button class="login-btn" id="login-btn">Log in</button>
+    <button class="login-btn" id="login-btn" onclick="window.netlifyIdentity.open()">Log in</button>
     <div class="login-note">
       Don't have an account?<br>
       Contact <a href="mailto:shahsports.poland@gmail.com">shahsports.poland@gmail.com</a> for access.
@@ -368,6 +368,34 @@ tbody tr:hover{background:var(--off)}
    SHAH SPORTS ADMIN
    Auth: Netlify Identity · Storage: GitHub API via Git Gateway
    ═══════════════════════════════════════════════════════════ */
+
+/* ── Netlify Identity ───────────────────────────────────────
+   Registered at the top of the script so no event can be missed.
+   showApp / showLogin are hoisted function declarations, so they
+   are safe to reference here. Guarded so that a blocked CDN shows
+   the "did not load" message instead of a dead page. */
+if(window.netlifyIdentity){
+
+  window.netlifyIdentity.on('init', function(user) {
+    if (user) {
+      showApp(user);
+    }
+  });
+
+  window.netlifyIdentity.on('login', function(user) {
+    showApp(user);
+    window.netlifyIdentity.close();
+  });
+
+  window.netlifyIdentity.on('logout', function() {
+    showLogin();
+  });
+
+  window.netlifyIdentity.on('error', function(err){
+    toast('Login error: ' + (err && err.message ? err.message : 'unknown'), 'bad');
+  });
+
+}
 
 var REPO        = 'atarajput1990-maker/shahsports-website';
 var BRANCH      = 'main';
@@ -1068,7 +1096,6 @@ function showLogin(){
 }
 
 document.addEventListener('DOMContentLoaded', function(){
-  $('login-btn').onclick = function(){ netlifyIdentity.open('login'); };
   $('logout-btn').onclick = function(){ netlifyIdentity.logout(); };
   $('panel-x').onclick = closePanel;
   $('cancel-btn').onclick = closePanel;
@@ -1102,12 +1129,7 @@ document.addEventListener('DOMContentLoaded', function(){
     return;
   }
 
-  netlifyIdentity.on('init', function(user){ user ? showApp(user) : showLogin(); });
-  netlifyIdentity.on('login', function(user){ netlifyIdentity.close(); showApp(user); });
-  netlifyIdentity.on('logout', function(){ showLogin(); });
-  netlifyIdentity.on('error', function(err){
-    toast('Login error: ' + (err && err.message ? err.message : 'unknown'), 'bad');
-  });
+  /* handlers are registered at the top of this script — fire them */
   netlifyIdentity.init();
 });
 </script>
