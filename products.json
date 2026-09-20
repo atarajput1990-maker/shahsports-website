@@ -265,6 +265,20 @@
       "bow": "Low bow",
       "description": "Shah hockey stick with low bow Senior and Junior players.",
       "image": "/images/products/sh7000-shah-hockey-stick-70-carbon-1789941380266.jpg"
+    },
+    {
+      "name": "SH5000",
+      "category": "Hockey stick",
+      "price": 95,
+      "badge": "",
+      "composition": "30-50% Carbon",
+      "sizes": "36.5 / 37.5 inch",
+      "weight": "490-520",
+      "dimensions": "",
+      "colours": "",
+      "bow": "Low bow",
+      "description": "Shah 50% Carbon made for Junior Players. \nLow Bow",
+      "image": "/images/products/sh5000-1789941565068.jpg"
     }
   ]
 }
