@@ -251,6 +251,20 @@
       "bow": "",
       "description": "Shah Hockey 100% Japanese Carbon \nLow bow",
       "image": "/images/products/100-carbon-hockey-stick-1789941198289.jpg"
+    },
+    {
+      "name": "SH7000 SHAH Hockey Stick 70% Carbon",
+      "category": "Hockey stick",
+      "price": 125,
+      "badge": "",
+      "composition": "70% Carbon",
+      "sizes": "36.5 / 37.5 / 38.5 inch",
+      "weight": "490- 515",
+      "dimensions": "",
+      "colours": "",
+      "bow": "Low bow",
+      "description": "Shah hockey stick with low bow Senior and Junior players.",
+      "image": "/images/products/sh7000-shah-hockey-stick-70-carbon-1789941380266.jpg"
     }
   ]
 }
