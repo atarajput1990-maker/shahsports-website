@@ -279,6 +279,20 @@
       "bow": "Low bow",
       "description": "Shah 50% Carbon made for Junior Players. \nLow Bow",
       "image": "/images/products/sh5000-1789941565068.jpg"
+    },
+    {
+      "name": "SH3000 30% Carbon Stick",
+      "category": "Hockey stick",
+      "price": 75,
+      "badge": "",
+      "composition": "30-50% Carbon",
+      "sizes": "36.5 / 37.5 inch",
+      "weight": "460-490",
+      "dimensions": "",
+      "colours": "",
+      "bow": "Low bow",
+      "description": "Shah 30% Carbon Sticks for the junior leval players. Perfect for school.leval players",
+      "image": "/images/products/sh3000-30-carbon-stick-1789941714506.jpg"
     }
   ]
 }
