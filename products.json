@@ -307,6 +307,20 @@
       "bow": "Low bow",
       "description": "Special made for Beginners. \nSoft Touch.",
       "image": "/images/products/ssh100-10-carbon-stick-1789941903026.jpg"
+    },
+    {
+      "name": "Shah Outdoor Gloves",
+      "category": "Glove",
+      "price": 25,
+      "badge": "",
+      "composition": "",
+      "sizes": "XS / S / M / L / XL",
+      "weight": "",
+      "dimensions": "",
+      "colours": "Red, Yellow, Gold, Green, Pink",
+      "bow": "",
+      "description": "Shah Outdoor Gloves multi Colours Available.",
+      "image": "/images/products/shah-outdoor-gloves-1789942066011.jpg"
     }
   ]
 }
