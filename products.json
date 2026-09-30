@@ -1,20 +1,6 @@
 {
   "products": [
     {
-      "name": "SH009 90% Carbon Low Bow",
-      "category": "Hockey stick",
-      "price": 149,
-      "badge": "Flagship",
-      "composition": "90% Carbon",
-      "sizes": "36.5 / 37.5 / 38.5 inch",
-      "weight": "540-560g",
-      "dimensions": "",
-      "colours": "Red, Yellow, Gold, Green, Pink",
-      "bow": "Low bow",
-      "description": "Our most popular competition stick. High impact resistance and improved control, ideal for flicking and 3D skills. Touch compound on the blade for superior ball grip, accurate trapping, and reverse stick control. Layered carbon strands greatly improve hitting and sweeping power.",
-      "image": "https://shahsports.eu/wp-content/uploads/2017/05/DSC_1868-min.jpg"
-    },
-    {
       "name": "Shah Indoor Low Bow",
       "category": "Hockey stick",
       "price": 89,
